@@ -47,7 +47,6 @@ Edit `apps/api/.env`:
 | `NEWSAPI_KEY` | Yes (for news) | Get from [NewsAPI](https://newsapi.org/register) |
 | `REDIS_URL` | Yes (for rate limiting) | `redis://localhost:6379` |
 | `MONGODB_URI` | No | `mongodb://localhost:27017/multi-api` for persistence |
-| `WEATHER_CITY` | No | Default city (default: New York) |
 | `PORT` | No | API port (default: 3333) |
 
 ### 3. Start Redis (if not already running)
