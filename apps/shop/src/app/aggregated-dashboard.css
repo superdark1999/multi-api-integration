@@ -1,0 +1,232 @@
+.aggregated-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.dashboard-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  min-width: 140px;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-row input {
+  min-width: 100px;
+}
+
+.filter-row span {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.refresh-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dashboard-loading {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.dashboard-content h2 {
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.crypto-card .card-header {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.crypto-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.crypto-symbol {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.crypto-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.crypto-cap {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 8px;
+}
+
+.weather-card .card-header {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.weather-city {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.weather-temp {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.weather-condition {
+  font-size: 0.95rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+.news-card {
+  text-decoration: none;
+  color: inherit;
+  border-left: 4px solid #fa709a;
+}
+
+.news-title {
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #333;
+}
+
+.news-source {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 8px;
+}
+
+.empty-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  color: #999;
+  font-style: italic;
+}
+
+.fetched-at {
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+  margin-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .aggregated-dashboard {
+    padding: 16px;
+  }
+
+  .dashboard-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    min-width: auto;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+}

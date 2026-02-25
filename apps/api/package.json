@@ -123,8 +123,9 @@
     ]
   },
   "dependencies": {
+    "dotenv": "^16.6.1",
     "express": "^4.21.2",
-    "@org/api-products": "*",
-    "@org/models": "*"
+    "ioredis": "^5.9.3",
+    "mongodb": "^6.21.0"
   }
 }

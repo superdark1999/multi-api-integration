@@ -1,17 +1,18 @@
+import 'dotenv/config';
 import express from 'express';
-import { ProductsService } from '@org/api-products';
-import { ApiResponse, Product, ProductFilter, PaginatedResponse } from '@org/models';
+import { connectMongo, disconnectMongo, isConnected } from './db/mongodb.js';
+import { connectRedis, disconnectRedis } from './db/redis.js';
+import { fetchAndAggregateData } from './services/aggregation.service.js';
+import { rateLimitMiddleware } from './middleware/rate-limit.js';
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3333;
 
 const app = express();
-const productsService = new ProductsService();
 
-// Middleware
 app.use(express.json());
+app.use(rateLimitMiddleware);
 
-// CORS configuration for React app
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -24,97 +25,58 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-  res.send({ message: 'Hello API' });
+  res.send({ message: 'Multi-API Integration API' });
 });
 
-// Products endpoints
-app.get('/api/products', (req, res) => {
+app.get('/aggregated-data', async (req, res) => {
   try {
-    const filter: ProductFilter = {};
-
-    if (req.query.category) {
-      filter.category = req.query.category as string;
-    }
-    if (req.query.minPrice) {
-      filter.minPrice = Number(req.query.minPrice);
-    }
-    if (req.query.maxPrice) {
-      filter.maxPrice = Number(req.query.maxPrice);
-    }
-    if (req.query.inStock !== undefined) {
-      filter.inStock = req.query.inStock === 'true';
-    }
-    if (req.query.searchTerm) {
-      filter.searchTerm = req.query.searchTerm as string;
-    }
-
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const pageSize = req.query.pageSize ? Number(req.query.pageSize) : 10;
-
-    const result = productsService.getProducts(filter, page, pageSize);
-
-    const response: ApiResponse<PaginatedResponse<Product>> = {
-      data: result,
-      success: true,
-    };
-
-    res.json(response);
+    const city = req.query.city as string | undefined;
+    const newsKeyword = req.query.newsKeyword as string | undefined;
+    const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined;
+    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined;
+    const data = await fetchAndAggregateData({
+      city,
+      newsKeyword,
+      minPrice,
+      maxPrice,
+    });
+    res.json(data);
   } catch (error) {
-    const response: ApiResponse<any> = {
-      data: null,
-      success: false,
-      error: 'An error occurred while fetching products',
-    };
-    res.status(500).json(response);
+    console.error('[aggregated-data]', error);
+    res.status(500).json({
+      error: 'Failed to fetch aggregated data',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 });
 
-app.get('/api/products/categories', (req, res) => {
-  try {
-    const categories = productsService.getCategories();
-    const response: ApiResponse<string[]> = {
-      data: categories,
-      success: true,
-    };
-    res.json(response);
-  } catch (error) {
-    const response: ApiResponse<any> = {
-      data: null,
-      success: false,
-      error: 'An error occurred while fetching categories',
-    };
-    res.status(500).json(response);
-  }
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    database: isConnected() ? 'connected' : 'disconnected',
+  });
 });
 
-app.get('/api/products/:id', (req, res) => {
-  try {
-    const product = productsService.getProductById(req.params.id);
+const mongoUri = process.env.MONGODB_URI;
+if (mongoUri) {
+  connectMongo(mongoUri).catch((err) => {
+    console.warn('[MongoDB] Connection failed, data will not be persisted:', err.message);
+  });
+}
 
-    if (!product) {
-      const response: ApiResponse<any> = {
-        data: null,
-        success: false,
-        error: 'Product not found',
-      };
-      return res.status(404).json(response);
-    }
+const redisUrl = process.env.REDIS_URL;
+if (redisUrl) {
+  connectRedis(redisUrl).catch((err) => {
+    console.warn('[Redis] Connection failed, rate limiting disabled:', err.message);
+  });
+}
 
-    const response: ApiResponse<Product> = {
-      data: product,
-      success: true,
-    };
-    return res.json(response);
-  } catch (error) {
-    const response: ApiResponse<any> = {
-      data: null,
-      success: false,
-      error: 'An error occurred while fetching the product',
-    };
-    return res.status(500).json(response);
-  }
-});
-
-app.listen(port, host, () => {
+const server = app.listen(port, host, () => {
   console.log(`[ ready ] http://${host}:${port}`);
+});
+
+process.on('SIGTERM', async () => {
+  await disconnectMongo();
+  await disconnectRedis();
+  server.close();
 });
